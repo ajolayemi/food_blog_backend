@@ -30,6 +30,14 @@ class MealsTable(DatabaseCon):
     def __init__(self, database_name: str):
         super().__init__(database_name)
 
+    def get_meal_id(self, meal_name: str) -> int:
+        """ Returns the id associated with meal_name. """
+        query = f"SELECT meal_id FROM meals WHERE meal_name == '{meal_name}'"
+        self.cursor.execute(query)
+        result = self.cursor.fetchone()
+        if result:
+            return result[0]
+
     def __str__(self):
         """ A string representation of this table which
         returns all meals available in the table"""
@@ -63,6 +71,15 @@ class IngredientTable(DatabaseCon):
 
     def __init__(self, database_name: str):
         super().__init__(database_name)
+
+    def get_ingredient_id(self, ingredient_name: str) -> int:
+        """ Returns the id associated with ingredient_name.
+        returns None if the ingredient isn't in database. """
+        query = f"SELECT ingredient_id FROM ingredients WHERE ingredient_name == '{ingredient_name}'"
+        self.cursor.execute(query)
+        result = self.cursor.fetchone()
+        if result:
+            return result[0]
 
     def get_ingredients(self, ingredient: str) -> list[tuple[str, int]]:
         """ Get's a list of all ingredients that contains ingredient's
@@ -181,7 +198,7 @@ class QuantityTable(DatabaseCon):
         """Gets recipe/s id or ids associated with a particular ingredient_id"""
         query = f"SELECT recipe_id FROM quantity WHERE ingredient_id == {ingredient_id}"
         self.cursor.execute(query)
-        return self.cursor.fetchall()
+        return list(map(lambda x: x[0], self.cursor.fetchall()))
 
     def populate_table(self, measure_id: int, ingredient_id: int,
                        quantity: int, recipe_id: int):
@@ -209,4 +226,7 @@ class QuantityTable(DatabaseCon):
 if __name__ == '__main__':
     a = IngredientTable(database_name='food_blog.db')
     b = QuantityTable(database_name='food_blog.db')
+    c = MealsTable(database_name='food_blog.db')
     print(b.get_recipe_id(6))
+    print(a.get_ingredient_id('sugar'))
+    print(c.get_meal_id('lunch'))
