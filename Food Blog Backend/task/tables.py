@@ -27,7 +27,7 @@ class DatabaseCon:
 class MealsTable(DatabaseCon):
     table_name = 'meals'
 
-    def __init__(self, database_name: str, meal_names: list):
+    def __init__(self, database_name: str, meal_names: list = None):
         super().__init__(database_name)
         self.meal_names = meal_names
 
@@ -139,16 +139,18 @@ class RecipeTable(DatabaseCon):
 class ServeTable(DatabaseCon):
     table_name = 'serve'
 
-    def __init__(self, database_name: str, meal_ids: list, recipe_id: int):
+    def __init__(self, database_name: str, meal_ids: list = None,
+                 recipe_id: int = None):
         super(ServeTable, self).__init__(database_name)
         self.meals = meal_ids
         self.recipe = recipe_id
 
     def populate_table(self):
         for meal_id in self.meals:
-            query = f"INSERT INTO serve(recipe_id, meal_id) VALUES ({self.recipe}, " \
-                    f"{meal_id})"
-            self.cursor.execute(query)
+            if meal_id:
+                query = f"INSERT INTO serve(recipe_id, meal_id) VALUES ({self.recipe}, " \
+                        f"{meal_id})"
+                self.cursor.execute(query)
         self.connection.commit()
         self.connection.close()
 

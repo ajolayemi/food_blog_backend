@@ -4,7 +4,8 @@ import argparse
 import sys
 
 from tables import (MealsTable, MeasureTable,
-                    IngredientTable, RecipeTable)
+                    IngredientTable, RecipeTable,
+                    ServeTable)
 
 data = {"meals": ("breakfast", "brunch", "lunch", "supper"),
         "ingredients": ("milk", "cacao", "strawberry", "blueberry", "blackberry", "sugar"),
@@ -33,6 +34,7 @@ class PopulateTables:
     @staticmethod
     def populate_recipe_table():
         RecipeTable(database_name=db_name).create_table()
+        ServeTable(database_name=db_name).create_table()
         print('Pass the empty recipe name to exit')
         while True:
             recipe_name = input('Recipe name: ')
@@ -43,7 +45,14 @@ class PopulateTables:
                 recipe_table_cls = RecipeTable(database_name=db_name,
                                                recipe_name=recipe_name,
                                                recipe_description=recipe_description)
-                recipe_table_cls.populate_table()
+                meal_cls = MealsTable(database_name=db_name)
+                recipe_id = recipe_table_cls.populate_table()
+                print(meal_cls)
+                dish_time = input('When the dish can be served: ').split(' ')
+                serve_table_cls = ServeTable(database_name=db_name,
+                                             meal_ids=dish_time,
+                                             recipe_id=recipe_id)
+                serve_table_cls.populate_table()
 
     @staticmethod
     def populate_measures_table():
