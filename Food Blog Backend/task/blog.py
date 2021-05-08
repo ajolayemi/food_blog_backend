@@ -64,7 +64,35 @@ class MealsTable(DatabaseCon):
         self.connection.commit()
 
 
+class IngredientTable(DatabaseCon):
+    table_name = 'ingredients'
+
+    def __init__(self, ingredient_id: int, ingredient_name: str):
+        super().__init__()
+        self.ingredient_id = ingredient_id
+        self.ingredient = ingredient_name
+
+        self.create_con()
+
+        self.table_creator()
+
+    def populate_ingredient_table(self):
+        query = f'INSERT INTO ingredients (ingredient_id, ingredient_name) VALUES (' \
+                f'{self.ingredient_id}, {self.ingredient})'
+        self.cursor.execute(query)
+        self.connection.commit()
+
+    def table_creator(self):
+        """ Creates ingredients table """
+        query = f'CREATE TABLE IF NOT EXISTS {IngredientTable.table_name} (' \
+                f'ingredient_id INT PRIMARY KEY,' \
+                f'ingredient_name VARCHAR(20) NOT NULL UNIQUE )'
+        self.cursor.execute(query)
+        self.connection.commit()
+
+
 if __name__ == '__main__':
-    a = MealsTable(1, 'a')
+    a = IngredientTable(1, 's')
+
 
 
