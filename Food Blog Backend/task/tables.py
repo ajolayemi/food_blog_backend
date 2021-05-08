@@ -114,6 +114,7 @@ class RecipeTable(DatabaseCon):
         self.cursor.execute(query)
         self.connection.commit()
         self.connection.close()
+        return self.cursor.lastrowid
 
     def create_table(self):
         query = f'CREATE TABLE IF NOT EXISTS {RecipeTable.table_name} (' \
@@ -127,7 +128,7 @@ class RecipeTable(DatabaseCon):
 class ServeTable(DatabaseCon):
     table_name = 'serve'
 
-    def __init__(self, database_name: str):
+    def __init__(self, database_name: str, meal_id: int, recipe_id: int):
         super(ServeTable, self).__init__(database_name)
 
     def create_table(self):
@@ -139,4 +140,3 @@ class ServeTable(DatabaseCon):
                 f'FOREIGN KEY(meal_id) REFERENCES meals(meal_id))'
         self.cursor.execute(query)
         self.connection.commit()
-
