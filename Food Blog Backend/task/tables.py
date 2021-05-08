@@ -98,3 +98,27 @@ class MeasureTable(DatabaseCon):
         self.cursor.execute(query)
         self.connection.commit()
 
+
+class RecipeTable(DatabaseCon):
+    table_name = 'recipes'
+
+    def __init__(self, database_name: str = None, recipe_name: str = None,
+                 recipe_description: str = None):
+        super().__init__(database_name)
+        self.recipe = recipe_name
+        self.description = recipe_description
+
+    def populate_table(self):
+        query = f"INSERT INTO recipes(recipe_name, recipe_description) VALUES(" \
+                f"'{self.recipe}', '{self.description}')"
+        self.cursor.execute(query)
+        self.connection.commit()
+        self.connection.close()
+
+    def create_table(self):
+        query = f'CREATE TABLE IF NOT EXISTS {RecipeTable.table_name} (' \
+                f'recipe_id INTEGER PRIMARY KEY AUTOINCREMENT,' \
+                f'recipe_name VARCHAR(40) NOT NULL,' \
+                f'recipe_description VARCHAR(100))'
+        self.cursor.execute(query)
+        self.connection.commit()
