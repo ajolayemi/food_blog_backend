@@ -90,8 +90,32 @@ class IngredientTable(DatabaseCon):
         self.connection.commit()
 
 
+class MeasureTable(DatabaseCon):
+    table_name = 'measures'
+
+    def __init__(self, name: str):
+        super().__init__()
+        self.measure_name = name
+
+        self.table_creator()
+
+    def populate_measure_table(self):
+        query = f"INSERT INTO measures(measure_name) VALUES ('{self.measure_name}')"
+        self.cursor.execute(query)
+        self.connection.commit()
+
+    def table_creator(self):
+        query = f'CREATE TABLE IF NOT EXISTS {MeasureTable.table_name} (' \
+                f'measure_id INTEGER PRIMARY KEY AUTOINCREMENT, ' \
+                f'measure_name VARCHAR(20) NOT NULL UNIQUE)'
+        self.cursor.execute(query)
+        self.connection.commit()
+
+
 if __name__ == '__main__':
-    a = IngredientTable(1, 's')
+    a = MeasureTable('c')
+
+
 
 
 
