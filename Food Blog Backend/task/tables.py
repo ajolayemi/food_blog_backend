@@ -28,9 +28,9 @@ class DatabaseCon:
 class MealsTable(DatabaseCon):
     table_name = 'meals'
 
-    def __init__(self, meal_name: str):
+    def __init__(self, meal_names: tuple):
         super().__init__()
-        self.meal_name = meal_name
+        self.meal_name = meal_names
 
         self.table_creator()
 
