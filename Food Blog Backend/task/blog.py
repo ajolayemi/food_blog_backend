@@ -2,3 +2,30 @@
 
 import sqlite3 as sq
 
+
+class DatabaseCon:
+    """ Creates database connection. """
+
+    def __init__(self, database_name: str):
+        self.db = database_name
+        self.cursor = None
+        self.connection = None
+        self.create_con()
+
+    def create_con(self):
+        """ Creates database connection. """
+        self.connection = sq.connect(self.db)
+        self.cursor = self.connection.cursor()
+
+    def __str__(self):
+        """ A string representation of this class """
+        return f'A database named "{self.db}" has been created. '
+
+    def __repr__(self):
+        return f'Database [(name, {self.db}), (cursor, {self.cursor}), ' \
+               f'(connection, {self.connection}]'
+
+
+if __name__ == '__main__':
+    a = DatabaseCon('test')
+    print(a.__repr__())
