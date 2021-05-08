@@ -28,10 +28,16 @@ class PopulateTables:
     """ Populates all the 3 tables being used in this project. """
 
     @staticmethod
+    def populate_ingredient_table():
+        ingredients = list(data.get("ingredients"))
+        ingredients_class = IngredientTable(database_name=db_name, ingredient_names=ingredients)
+        ingredients_class.populate_table()
+
+    @staticmethod
     def populate_meals_table():
         meal_data = list(data.get("meals"))
         meal_table_class = MealsTable(database_name=db_name, meal_names=meal_data)
-        meal_table_class.populate_meal_table()
+        meal_table_class.populate_table()
 
 
 if __name__ == '__main__':
