@@ -42,24 +42,22 @@ class DatabaseCon:
 class MealsTable(DatabaseCon):
     table_name = 'meals'
 
-    def __init__(self, meal_id: int, meal_name: str):
+    def __init__(self, meal_name: str):
         super().__init__()
-        self.meal_id = meal_id
         self.meal_name = meal_name
 
         self.table_creator()
 
     def populate_table(self):
         """ Populates meals table. """
-        query = f'INSERT INTO meals (meal_id, meal_name) VALUES (' \
-                f'{self.meal_id}, {self.meal_name})'
+        query = f"INSERT INTO meals(meal_name) VALUES('{self.meal_name}')"
         self.cursor.execute(query)
         self.connection.commit()
 
     def table_creator(self):
         """ Creates meals table. """
         query = f'CREATE TABLE IF NOT EXISTS  {MealsTable.table_name} (' \
-                f'meals_id INT PRIMARY KEY,' \
+                f'meals_id INTEGER PRIMARY KEY AUTOINCREMENT,' \
                 f'meal_name VARCHAR(20) NOT NULL UNIQUE )'
         self.cursor.execute(query)
         self.connection.commit()
@@ -111,5 +109,5 @@ class MeasureTable(DatabaseCon):
 
 
 if __name__ == '__main__':
-    a = IngredientTable('o')
-    a.populate_ingredient_table()
+    a = MealsTable('b')
+    a.populate_table()
