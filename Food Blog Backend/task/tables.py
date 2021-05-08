@@ -33,7 +33,7 @@ class MealsTable(DatabaseCon):
 
         self.table_creator()
 
-    def populate_meal_table(self):
+    def populate_table(self):
         """ Populates meals table. """
         for meal in self.meal_names:
             if meal:
@@ -44,7 +44,7 @@ class MealsTable(DatabaseCon):
     def table_creator(self):
         """ Creates meals table. """
         query = f'CREATE TABLE IF NOT EXISTS  {MealsTable.table_name} (' \
-                f'meals_id INTEGER PRIMARY KEY AUTOINCREMENT,' \
+                f'meal_id INTEGER PRIMARY KEY AUTOINCREMENT,' \
                 f'meal_name VARCHAR(20) NOT NULL UNIQUE )'
         self.cursor.execute(query)
         self.connection.commit()
@@ -59,7 +59,7 @@ class IngredientTable(DatabaseCon):
 
         self.table_creator()
 
-    def populate_ingredient_table(self):
+    def populate_table(self):
         for ingredient in self.ingredients:
             if ingredient:
                 query = f"INSERT INTO ingredients(ingredient_name) VALUES('{ingredient}')"
@@ -84,11 +84,12 @@ class MeasureTable(DatabaseCon):
 
         self.table_creator()
 
-    def populate_measure_table(self):
+    def populate_table(self):
         for measure in self.measure_names:
             query = f"INSERT INTO measures(measure_name) VALUES ('{measure}')"
             self.cursor.execute(query)
         self.connection.commit()
+        self.connection.close()
 
     def table_creator(self):
         query = f'CREATE TABLE IF NOT EXISTS {MeasureTable.table_name} (' \
@@ -96,3 +97,4 @@ class MeasureTable(DatabaseCon):
                 f'measure_name VARCHAR(20) UNIQUE)'
         self.cursor.execute(query)
         self.connection.commit()
+
