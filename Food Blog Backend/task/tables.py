@@ -89,11 +89,19 @@ class IngredientTable(DatabaseCon):
 class MeasureTable(DatabaseCon):
     table_name = 'measures'
 
-    def __init__(self, database_name: str, measure_names: list):
+    def __init__(self, database_name: str, measure_names: list = None):
         super().__init__(database_name)
         self.measure_names = measure_names
 
         self.table_creator()
+
+    def get_measure_names(self, letter: str):
+        """ Get's all measure names starting with letter. """
+        query = f"SELECT measure_name FROM measures WHERE measure_name >= '{letter}'"
+        self.cursor.execute(query)
+        results = self.cursor.fetchall()
+        matching_measures = [measure[0] for measure in results if measure[0].startswith(letter)]
+        return matching_measures
 
     def populate_table(self):
         for measure in self.measure_names:
@@ -176,10 +184,10 @@ class QuantityTable(DatabaseCon):
                 f'quantity_id INTEGER PRIMARY KEY AUTOINCREMENT,' \
                 f'measure_id INTEGER NOT NULL,' \
                 f'ingredient_id INTEGER NOT NULL,' \
-                f'quantity_id INTEGER NOT NULL,' \
+                f'quantity INTEGER NOT NULL,' \
                 f'recipe_id INTEGER NOT NULL,' \
                 f'FOREIGN KEY(measure_id) REFERENCES measures(measure_id),' \
                 f'FOREIGN KEY (ingredient_id) REFERENCES ingredients(ingredient_id),' \
                 f'FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id))'
-        self.cursor.execute()
+        self.cursor.execute(query)
         self.connection.commit()
