@@ -53,15 +53,17 @@ class MealsTable(DatabaseCon):
 class IngredientTable(DatabaseCon):
     table_name = 'ingredients'
 
-    def __init__(self, ingredient_name: str):
-        super().__init__()
-        self.ingredient = ingredient_name
+    def __init__(self, database_name: str, ingredient_names: list):
+        super().__init__(database_name)
+        self.ingredients = ingredient_names
 
         self.table_creator()
 
     def populate_ingredient_table(self):
-        query = f"INSERT INTO ingredients(ingredient_name) VALUES('{self.ingredient}')"
-        self.cursor.execute(query)
+        for ingredient in self.ingredients:
+            if ingredient:
+                query = f"INSERT INTO ingredients(ingredient_name) VALUES('{ingredient}')"
+                self.cursor.execute(query)
         self.connection.commit()
 
     def table_creator(self):
