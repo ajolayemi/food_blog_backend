@@ -163,3 +163,23 @@ class ServeTable(DatabaseCon):
                 f'FOREIGN KEY(meal_id) REFERENCES meals(meal_id))'
         self.cursor.execute(query)
         self.connection.commit()
+
+
+class QuantityTable(DatabaseCon):
+    table_name = 'quantity'
+
+    def __init__(self, database_name: str):
+        super().__init__(database_name)
+
+    def create_table(self):
+        query = f'CREATE TABLE IF NOT EXISTS {QuantityTable.table_name} (' \
+                f'quantity_id INTEGER PRIMARY KEY AUTOINCREMENT,' \
+                f'measure_id INTEGER NOT NULL,' \
+                f'ingredient_id INTEGER NOT NULL,' \
+                f'quantity_id INTEGER NOT NULL,' \
+                f'recipe_id INTEGER NOT NULL,' \
+                f'FOREIGN KEY(measure_id) REFERENCES measures(measure_id),' \
+                f'FOREIGN KEY (ingredient_id) REFERENCES ingredients(ingredient_id),' \
+                f'FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id))'
+        self.cursor.execute()
+        self.connection.commit()
