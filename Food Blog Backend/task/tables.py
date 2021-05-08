@@ -8,7 +8,6 @@ class DatabaseCon:
         self.db = database_name
         self.cursor = None
         self.connection = None
-
         self.create_con()
 
     def create_con(self):
@@ -28,16 +27,18 @@ class DatabaseCon:
 class MealsTable(DatabaseCon):
     table_name = 'meals'
 
-    def __init__(self, meal_names: tuple):
-        super().__init__()
-        self.meal_name = meal_names
+    def __init__(self, database_name: str, meal_names: list):
+        super().__init__(database_name)
+        self.meal_names = meal_names
 
         self.table_creator()
 
     def populate_meal_table(self):
         """ Populates meals table. """
-        query = f"INSERT INTO meals(meal_name) VALUES('{self.meal_name}')"
-        self.cursor.execute(query)
+        for meal in self.meal_names:
+            if meal:
+                query = f"INSERT INTO meals(meal_name) VALUES('{meal}')"
+                self.cursor.execute(query)
         self.connection.commit()
 
     def table_creator(self):
