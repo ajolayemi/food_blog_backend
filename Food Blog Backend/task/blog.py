@@ -2,12 +2,13 @@
 
 import argparse
 
-from tables import (DatabaseCon, MealsTable, MeasureTable,
+from tables import (MealsTable, MeasureTable,
                     IngredientTable)
 
 data = {"meals": ("breakfast", "brunch", "lunch", "supper"),
         "ingredients": ("milk", "cacao", "strawberry", "blueberry", "blackberry", "sugar"),
         "measures": ("ml", "g", "l", "cup", "tbsp", "tsp", "dsp", "")}
+
 
 def cli_arguments():
     """ Handles command line arguments using argparse module. """
@@ -47,6 +48,12 @@ class PopulateTables:
         meal_table_class.populate_table()
 
 
+def main():
+    data_writer_cls = PopulateTables()
+    data_writer_cls.populate_meals_table()
+    data_writer_cls.populate_measures_table()
+    data_writer_cls.populate_ingredient_table()
+
+
 if __name__ == '__main__':
-    a = PopulateTables()
-    a.populate_measures_table()
+    main()
