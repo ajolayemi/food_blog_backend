@@ -128,8 +128,18 @@ class RecipeTable(DatabaseCon):
 class ServeTable(DatabaseCon):
     table_name = 'serve'
 
-    def __init__(self, database_name: str, meal_id: int, recipe_id: int):
+    def __init__(self, database_name: str, meal_ids: list, recipe_id: int):
         super(ServeTable, self).__init__(database_name)
+        self.meals = meal_ids
+        self.recipe = recipe_id
+
+    def populate_table(self):
+        for meal_id in self.meals:
+            query = f"INSERT INTO serve(recipe_id, meal_id) VALUES ({self.recipe}, " \
+                    f"{meal_id})"
+            self.cursor.execute(query)
+        self.connection.commit()
+        self.connection.close()
 
     def create_table(self):
         query = f'CREATE TABLE IF NOT EXISTS {ServeTable.table_name} (' \
