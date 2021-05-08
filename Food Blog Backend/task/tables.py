@@ -33,6 +33,17 @@ class MealsTable(DatabaseCon):
 
         self.table_creator()
 
+    def get_all_meals(self):
+        """ A string representation of this table which
+        returns all meals available in the table"""
+        query = f"SELECT meal_id, meal_name FROM meals"
+        self.cursor.execute(query)
+        results = self.cursor.fetchall()
+        output = ''
+        for meal in results:
+            output += f'{meal[0]}) {meal[1]}  '
+        print(output)
+
     def populate_table(self):
         """ Populates meals table. """
         for meal in self.meal_names:
