@@ -78,20 +78,21 @@ class IngredientTable(DatabaseCon):
 class MeasureTable(DatabaseCon):
     table_name = 'measures'
 
-    def __init__(self, name: str):
-        super().__init__()
-        self.measure_name = name
+    def __init__(self, database_name: str, measure_names: list):
+        super().__init__(database_name)
+        self.measure_names = measure_names
 
         self.table_creator()
 
     def populate_measure_table(self):
-        query = f"INSERT INTO measures(measure_name) VALUES ('{self.measure_name}')"
-        self.cursor.execute(query)
+        for measure in self.measure_names:
+            query = f"INSERT INTO measures(measure_name) VALUES ('{measure}')"
+            self.cursor.execute(query)
         self.connection.commit()
 
     def table_creator(self):
         query = f'CREATE TABLE IF NOT EXISTS {MeasureTable.table_name} (' \
                 f'measure_id INTEGER PRIMARY KEY AUTOINCREMENT, ' \
-                f'measure_name VARCHAR(20) NOT NULL UNIQUE)'
+                f'measure_name VARCHAR(20) UNIQUE)'
         self.cursor.execute(query)
         self.connection.commit()
