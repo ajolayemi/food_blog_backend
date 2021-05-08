@@ -17,10 +17,14 @@ def cli_arguments():
     parser = argparse.ArgumentParser(description='Accepts a single argument which is a database'
                                                  'name')
     parser.add_argument('db_name', type=str, help='Database name')
+    parser.add_argument('--ingredients', help='Pass in a list of ingredient names separated by comma.')
+    parser.add_argument('--meals', help='Pass in a list of meal names separated by comma.')
     return parser.parse_args()
 
 
 db_name = cli_arguments().db_name
+ingredients = cli_arguments().ingredients
+meals = cli_arguments().meals
 if db_name:
     pass
 else:
