@@ -177,6 +177,12 @@ class QuantityTable(DatabaseCon):
 
         super().__init__(database_name)
 
+    def get_recipe_id(self, ingredient_id: int):
+        """Gets recipe/s id or ids associated with a particular ingredient_id"""
+        query = f"SELECT recipe_id FROM quantity WHERE ingredient_id == {ingredient_id}"
+        self.cursor.execute(query)
+        return self.cursor.fetchall()
+
     def populate_table(self, measure_id: int, ingredient_id: int,
                        quantity: int, recipe_id: int):
         query = f"INSERT INTO quantity (measure_id, ingredient_id, quantity, recipe_id) VALUES (" \
@@ -198,3 +204,9 @@ class QuantityTable(DatabaseCon):
                 f'FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id))'
         self.cursor.execute(query)
         self.connection.commit()
+
+
+if __name__ == '__main__':
+    a = IngredientTable(database_name='food_blog.db')
+    b = QuantityTable(database_name='food_blog.db')
+    print(b.get_recipe_id(6))
