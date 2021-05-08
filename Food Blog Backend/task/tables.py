@@ -27,11 +27,8 @@ class DatabaseCon:
 class MealsTable(DatabaseCon):
     table_name = 'meals'
 
-    def __init__(self, database_name: str, meal_names: list = None):
+    def __init__(self, database_name: str):
         super().__init__(database_name)
-        self.meal_names = meal_names
-
-        self.table_creator()
 
     def __str__(self):
         """ A string representation of this table which
@@ -44,9 +41,9 @@ class MealsTable(DatabaseCon):
             output += f'{meal[0]}) {meal[1]}  '
         return output
 
-    def populate_table(self):
+    def populate_table(self, meal_names: list) -> None:
         """ Populates meals table. """
-        for meal in self.meal_names:
+        for meal in meal_names:
             if meal:
                 query = f"INSERT INTO meals(meal_name) VALUES('{meal}')"
                 self.cursor.execute(query)
@@ -64,23 +61,20 @@ class MealsTable(DatabaseCon):
 class IngredientTable(DatabaseCon):
     table_name = 'ingredients'
 
-    def __init__(self, database_name: str, ingredient_names: list = None):
+    def __init__(self, database_name: str):
         super().__init__(database_name)
-        self.ingredients = ingredient_names
 
-        self.table_creator()
-
-    def get_ingredients(self, ingredient: str):
+    def get_ingredients(self, ingredient: str) -> list[tuple[str, int]]:
         """ Get's a list of all ingredients that contains ingredient's
         string value in them. """
         query = f"SELECT ingredient_name, ingredient_id FROM ingredients WHERE ingredient_name " \
                 f"GLOB '{ingredient}*' OR ingredient_name GLOB '*{ingredient}'"
         self.cursor.execute(query)
         result = self.cursor.fetchall()
-        print(result)
+        return result
 
-    def populate_table(self):
-        for ingredient in self.ingredients:
+    def populate_table(self, ingredients: list) -> None:
+        for ingredient in ingredients:
             if ingredient:
                 query = f"INSERT INTO ingredients(ingredient_name) VALUES('{ingredient}')"
                 self.cursor.execute(query)
@@ -98,25 +92,24 @@ class IngredientTable(DatabaseCon):
 class MeasureTable(DatabaseCon):
     table_name = 'measures'
 
-    def __init__(self, database_name: str, measure_names: list = None):
+    def __init__(self, database_name: str):
         super().__init__(database_name)
-        self.measure_names = measure_names
-
-        self.table_creator()
 
     def get_measure_names(self, letter: str) -> list[list[int, str]]:
         """ Get's all measure names starting with letter. """
-        query = f"SELECT  measure_name, measure_id FROM measures WHERE measure_name GLOB '{letter}*'"
+        if letter == '':
+            query = f"SELECT  measure_name, measure_id FROM measures WHERE measure_name == '{letter}'"
+        else:
+            query = f"SELECT  measure_name, measure_id FROM measures WHERE measure_name GLOB '{letter}*'"
         self.cursor.execute(query)
         results = self.cursor.fetchall()
         return results
 
-    def populate_table(self):
-        for measure in self.measure_names:
+    def populate_table(self, measure_names: list) -> None:
+        for measure in measure_names:
             query = f"INSERT INTO measures(measure_name) VALUES ('{measure}')"
             self.cursor.execute(query)
         self.connection.commit()
-        self.connection.close()
 
     def table_creator(self):
         query = f'CREATE TABLE IF NOT EXISTS {MeasureTable.table_name} (' \
@@ -129,18 +122,16 @@ class MeasureTable(DatabaseCon):
 class RecipeTable(DatabaseCon):
     table_name = 'recipes'
 
-    def __init__(self, database_name: str = None, recipe_name: str = None,
-                 recipe_description: str = None):
+    def __init__(self, database_name: str):
         super().__init__(database_name)
-        self.recipe = recipe_name
-        self.description = recipe_description
 
-    def populate_table(self):
+    def populate_table(self, recipe_name: str, recipe_description: str) -> int:
         query = f"INSERT INTO recipes(recipe_name, recipe_description) VALUES(" \
-                f"'{self.recipe}', '{self.description}')"
+                f"'{recipe_name}', '{recipe_description}')"
         self.cursor.execute(query)
         self.connection.commit()
-        self.connection.close()
+        # Am not closing connection because data are inserted into this table using
+        # loop
         return self.cursor.lastrowid
 
     def create_table(self):
@@ -155,20 +146,18 @@ class RecipeTable(DatabaseCon):
 class ServeTable(DatabaseCon):
     table_name = 'serve'
 
-    def __init__(self, database_name: str, meal_ids: list = None,
-                 recipe_id: int = None):
+    def __init__(self, database_name: str):
         super(ServeTable, self).__init__(database_name)
-        self.meals = meal_ids
-        self.recipe = recipe_id
 
-    def populate_table(self):
-        for meal_id in self.meals:
+    def populate_table(self, meals: list, recipe_id: int) -> None:
+        for meal_id in meals:
             if meal_id:
-                query = f"INSERT INTO serve(recipe_id, meal_id) VALUES ({self.recipe}, " \
+                query = f"INSERT INTO serve(recipe_id, meal_id) VALUES ({recipe_id}, " \
                         f"{meal_id})"
                 self.cursor.execute(query)
         self.connection.commit()
-        self.connection.close()
+        # Am not closing connection because data are inserted into this table using
+        # loop
 
     def create_table(self):
         query = f'CREATE TABLE IF NOT EXISTS {ServeTable.table_name} (' \
@@ -185,7 +174,17 @@ class QuantityTable(DatabaseCon):
     table_name = 'quantity'
 
     def __init__(self, database_name: str):
+
         super().__init__(database_name)
+
+    def populate_table(self, measure_id: int, ingredient_id: int,
+                       quantity: int, recipe_id: int):
+        query = f"INSERT INTO quantity (measure_id, ingredient_id, quantity, recipe_id) VALUES (" \
+                f"{measure_id}, {ingredient_id}, {quantity}, {recipe_id})"
+        self.cursor.execute(query)
+        self.connection.commit()
+        # Am not closing connection because data are inserted into this table using
+        # loop
 
     def create_table(self):
         query = f'CREATE TABLE IF NOT EXISTS {QuantityTable.table_name} (' \
