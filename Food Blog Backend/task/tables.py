@@ -122,3 +122,21 @@ class RecipeTable(DatabaseCon):
                 f'recipe_description VARCHAR(100))'
         self.cursor.execute(query)
         self.connection.commit()
+
+
+class ServeTable(DatabaseCon):
+    table_name = 'serve'
+
+    def __init__(self, database_name: str):
+        super(ServeTable, self).__init__(database_name)
+
+    def create_table(self):
+        query = f'CREATE TABLE IF NOT EXISTS {ServeTable.table_name} (' \
+                f'serve_id INTEGER PRIMARY KEY AUTOINCREMENT,' \
+                f'recipe_id INTEGER NOT NULL,' \
+                f'meal_id INTEGER NOT NULL,' \
+                f'FOREIGN KEY(recipe_id) REFERENCES recipes(recipe_id),' \
+                f'FOREIGN KEY(meal_id) REFERENCES meals(meal_id))'
+        self.cursor.execute(query)
+        self.connection.commit()
+
