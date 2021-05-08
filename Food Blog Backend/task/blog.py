@@ -23,6 +23,8 @@ class DatabaseCon:
         self.cursor = None
         self.connection = None
 
+        self.create_con()
+
     def create_con(self):
         """ Creates database connection. """
         self.connection = sq.connect(self.db)
@@ -42,7 +44,6 @@ class MealsTable(DatabaseCon):
 
     def __init__(self, meal_id: int, meal_name: str):
         super().__init__()
-        self.create_con()
         self.meal_id = meal_id
         self.meal_name = meal_name
 
@@ -71,8 +72,6 @@ class IngredientTable(DatabaseCon):
         super().__init__()
         self.ingredient_id = ingredient_id
         self.ingredient = ingredient_name
-
-        self.create_con()
 
         self.table_creator()
 
