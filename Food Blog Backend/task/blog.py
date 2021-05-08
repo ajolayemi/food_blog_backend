@@ -48,7 +48,7 @@ class MealsTable(DatabaseCon):
 
         self.table_creator()
 
-    def populate_table(self):
+    def populate_meal_table(self):
         """ Populates meals table. """
         query = f"INSERT INTO meals(meal_name) VALUES('{self.meal_name}')"
         self.cursor.execute(query)
@@ -110,4 +110,4 @@ class MeasureTable(DatabaseCon):
 
 if __name__ == '__main__':
     a = MealsTable('b')
-    a.populate_table()
+    a.populate_meal_table()
