@@ -64,11 +64,20 @@ class MealsTable(DatabaseCon):
 class IngredientTable(DatabaseCon):
     table_name = 'ingredients'
 
-    def __init__(self, database_name: str, ingredient_names: list):
+    def __init__(self, database_name: str, ingredient_names: list = None):
         super().__init__(database_name)
         self.ingredients = ingredient_names
 
         self.table_creator()
+
+    def get_ingredients(self, ingredient: str):
+        """ Get's a list of all ingredients that contains ingredient's
+        string value in them. """
+        query = f"SELECT ingredient_name, ingredient_id FROM ingredients WHERE ingredient_name " \
+                f"GLOB '{ingredient}*' OR ingredient_name GLOB '*{ingredient}'"
+        self.cursor.execute(query)
+        result = self.cursor.fetchall()
+        print(result)
 
     def populate_table(self):
         for ingredient in self.ingredients:
@@ -95,13 +104,12 @@ class MeasureTable(DatabaseCon):
 
         self.table_creator()
 
-    def get_measure_names(self, letter: str):
+    def get_measure_names(self, letter: str) -> list[list[int, str]]:
         """ Get's all measure names starting with letter. """
-        query = f"SELECT measure_name FROM measures WHERE measure_name >= '{letter}'"
+        query = f"SELECT  measure_name, measure_id FROM measures WHERE measure_name GLOB '{letter}*'"
         self.cursor.execute(query)
         results = self.cursor.fetchall()
-        matching_measures = [measure[0] for measure in results if measure[0].startswith(letter)]
-        return matching_measures
+        return results
 
     def populate_table(self):
         for measure in self.measure_names:
