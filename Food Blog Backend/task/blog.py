@@ -23,8 +23,16 @@ def cli_arguments():
 
 
 db_name = cli_arguments().db_name
-ingredients = cli_arguments().ingredients
-meals = cli_arguments().meals
+if cli_arguments().ingredients:
+    user_ingredients = tuple(cli_arguments().ingredients.split(','))
+else:
+    user_ingredients = None
+
+if cli_arguments().meals:
+    meals = tuple(cli_arguments().meals.split(','))
+else:
+    meals = None
+
 if db_name:
     pass
 else:
@@ -35,6 +43,29 @@ else:
 class BlogBackend:
     """ The food blog backend that communicates with the
     3 database tables being used in this project. """
+
+    @staticmethod
+    def recommend_recipe():
+        ingredient_class = IngredientTable(database_name=db_name)
+        ingredient_class.table_creator()
+
+        meal_class = MealsTable(database_name=db_name)
+        meal_class.table_creator()
+
+        serve_class = ServeTable(database_name=db_name)
+        serve_class.create_table()
+
+        quantity_class = QuantityTable(database_name=db_name)
+        quantity_class.create_table()
+
+        recipe_class = RecipeTable(database_name=db_name)
+        recipe_class.create_table()
+
+        ingredients_ids = ingredient_class.get_ingredient_ids(ingredient_names=user_ingredients)
+        matching_recipes = quantity_class.get_recipe_ids(ingredient_ids=ingredients_ids)
+        meal_ids = meal_class.get_meal_ids(meal_names=meals)
+        final_result = serve_class.recommend_recipe(recipe_ids=matching_recipes, meal_ids=meal_ids)
+        print(f'Recipes selected for you: {recipe_class.get_recipe_names(recipe_ids=final_result)}')
 
     @staticmethod
     def populate_recipe_table():
@@ -119,11 +150,14 @@ class BlogBackend:
 
 
 def main():
-    data_writer_cls = BlogBackend()
-    data_writer_cls.populate_meals_table()
-    data_writer_cls.populate_ingredient_table()
-    data_writer_cls.populate_measures_table()
-    data_writer_cls.populate_recipe_table()
+    backend = BlogBackend()
+    if not user_ingredients and not meals:
+        backend.populate_meals_table()
+        backend.populate_ingredient_table()
+        backend.populate_measures_table()
+        backend.populate_recipe_table()
+    else:
+        backend.recommend_recipe()
 
 
 if __name__ == '__main__':

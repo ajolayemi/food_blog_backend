@@ -30,13 +30,15 @@ class MealsTable(DatabaseCon):
     def __init__(self, database_name: str):
         super().__init__(database_name)
 
-    def get_meal_id(self, meal_name: str) -> int:
-        """ Returns the id associated with meal_name. """
-        query = f"SELECT meal_id FROM meals WHERE meal_name == '{meal_name}'"
+    def get_meal_ids(self, meal_names: tuple) -> tuple[int]:
+        """ Returns the ids associated with all meals in meal_name. """
+        if len(meal_names) == 1:
+            query = f"SELECT meal_id FROM meals WHERE meal_name == '{meal_names[0]}'"
+        else:
+            query = f"SELECT meal_id FROM meals WHERE meal_name IN {meal_names}"
         self.cursor.execute(query)
-        result = self.cursor.fetchone()
-        if result:
-            return result[0]
+        result = self.cursor.fetchall()
+        return tuple(map(lambda x: x[0], result))
 
     def __str__(self):
         """ A string representation of this table which
@@ -75,10 +77,15 @@ class IngredientTable(DatabaseCon):
     def get_ingredient_ids(self, ingredient_names: tuple) -> tuple:
         """ Returns the ids associated with all ingredient in ingredient_names.
         returns an empty tuple otherwise if the ingredient isn't in database. """
-        query = f"SELECT ingredient_id FROM ingredients WHERE ingredient_name IN {ingredient_names}"
+        if len(ingredient_names) == 1:
+            query = f"SELECT ingredient_id FROM ingredients WHERE ingredient_name == '{ingredient_names[0]}'"
+        else:
+            query = f"SELECT ingredient_id FROM ingredients WHERE ingredient_name IN {ingredient_names}"
         self.cursor.execute(query)
         result = self.cursor.fetchall()
-        if result:
+        if len(result) < len(ingredient_names):
+            return ()
+        elif result:
             return tuple(list(map(lambda x: x[0], result)))
         else:
             return ()
@@ -144,6 +151,17 @@ class RecipeTable(DatabaseCon):
     def __init__(self, database_name: str):
         super().__init__(database_name)
 
+    def get_recipe_names(self, recipe_ids: tuple[int]) -> str:
+        if not recipe_ids:
+            return 'There are no such recipes in the database.'
+        elif len(recipe_ids) == 1:
+            query = f"SELECT recipe_name FROM recipes WHERE recipe_id == {recipe_ids[0]}"
+        else:
+            query = f"SELECT recipe_name FROM recipes WHERE recipe_id in {recipe_ids}"
+        self.cursor.execute(query)
+        recommended = ', '.join([recipe[0] for recipe in sorted(self.cursor.fetchall())])
+        return recommended
+
     def populate_table(self, recipe_name: str, recipe_description: str) -> int:
         query = f"INSERT INTO recipes(recipe_name, recipe_description) VALUES(" \
                 f"'{recipe_name}', '{recipe_description}')"
@@ -168,6 +186,29 @@ class ServeTable(DatabaseCon):
     def __init__(self, database_name: str):
         super(ServeTable, self).__init__(database_name)
 
+    def recommend_recipe(self, recipe_ids: tuple[int], meal_ids: tuple[int]):
+        if len(recipe_ids) < 1 or len(meal_ids) < 1:
+            return ()
+
+        elif len(recipe_ids) == 1 and len(meal_ids) > 1:
+            query = f"SELECT recipe_id FROM serve WHERE recipe_id == {recipe_ids[0]} AND " \
+                    f"meal_id IN {meal_ids}"
+        elif len(recipe_ids) > 1 and len(meal_ids) == 1:
+            query = f"SELECT recipe_id FROM serve WHERE recipe_id IN {recipe_ids} AND " \
+                    f"meal_id == {meal_ids[0]}"
+        elif len(recipe_ids) == 1 and len(meal_ids) == 1:
+            query = f"SELECT recipe_id FROM serve WHERE recipe_id == {recipe_ids[0]} AND " \
+                    f"meal_id == {meal_ids[0]}"
+        else:
+            query = f"SELECT recipe_id FROM serve WHERE recipe_id IN {recipe_ids} AND " \
+                    f"meal_id IN {meal_ids}"
+        self.cursor.execute(query)
+        result = self.cursor.fetchall()
+        if not result:
+            return ()
+        else:
+            return tuple(map(lambda x: x[0], result))
+
     def populate_table(self, meals: list, recipe_id: int) -> None:
         for meal_id in meals:
             if meal_id:
@@ -175,8 +216,6 @@ class ServeTable(DatabaseCon):
                         f"{meal_id})"
                 self.cursor.execute(query)
         self.connection.commit()
-        # Am not closing connection because data are inserted into this table using
-        # loop
 
     def create_table(self):
         query = f'CREATE TABLE IF NOT EXISTS {ServeTable.table_name} (' \
@@ -196,11 +235,24 @@ class QuantityTable(DatabaseCon):
 
         super().__init__(database_name)
 
-    def get_recipe_id(self, ingredient_id: int):
-        """Gets recipe/s id or ids associated with a particular ingredient_id"""
-        query = f"SELECT recipe_id FROM quantity WHERE ingredient_id == {ingredient_id}"
+    def get_recipe_ids(self, ingredient_ids: tuple[int]) -> tuple[int]:
+        """Gets all recipes containing all of the provided ingredient_ids,
+        i.e containing all of the provided ingredients.
+        Returns a tuple containing ids of recipes matching the above condition. """
+        # This gets all recipes that contains even only one of ingredient ids
+        print(len(ingredient_ids))
+        if len(ingredient_ids) == 1:
+            query = f"SELECT recipe_id FROM quantity WHERE ingredient_id == {ingredient_ids[0]}"
+        else:
+            query = f"SELECT recipe_id FROM quantity WHERE ingredient_id IN {ingredient_ids}"
         self.cursor.execute(query)
-        return list(map(lambda x: x[0], self.cursor.fetchall()))
+        all_ids = self.cursor.fetchall()
+        filtered_ids = list(filter(lambda x: all_ids.count(x) == len(ingredient_ids), all_ids))
+        recipe_ids = []
+        for r_id in filtered_ids:
+            if r_id[0] not in recipe_ids:
+                recipe_ids.append(r_id[0])
+        return tuple(recipe_ids)
 
     def populate_table(self, measure_id: int, ingredient_id: int,
                        quantity: int, recipe_id: int):
@@ -223,10 +275,3 @@ class QuantityTable(DatabaseCon):
                 f'FOREIGN KEY (recipe_id) REFERENCES recipes(recipe_id))'
         self.cursor.execute(query)
         self.connection.commit()
-
-
-if __name__ == '__main__':
-    a = IngredientTable(database_name='food_blog.db')
-    b = QuantityTable(database_name='food_blog.db')
-    c = MealsTable(database_name='food_blog.db')
-    print(a.get_ingredient_ids(('sugar', 'milk', 'cacao')))
