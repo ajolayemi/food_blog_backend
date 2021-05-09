@@ -72,14 +72,16 @@ class IngredientTable(DatabaseCon):
     def __init__(self, database_name: str):
         super().__init__(database_name)
 
-    def get_ingredient_id(self, ingredient_name: str) -> int:
-        """ Returns the id associated with ingredient_name.
-        returns None if the ingredient isn't in database. """
-        query = f"SELECT ingredient_id FROM ingredients WHERE ingredient_name == '{ingredient_name}'"
+    def get_ingredient_ids(self, ingredient_names: tuple) -> tuple:
+        """ Returns the ids associated with all ingredient in ingredient_names.
+        returns an empty tuple otherwise if the ingredient isn't in database. """
+        query = f"SELECT ingredient_id FROM ingredients WHERE ingredient_name IN {ingredient_names}"
         self.cursor.execute(query)
-        result = self.cursor.fetchone()
+        result = self.cursor.fetchall()
         if result:
-            return result[0]
+            return tuple(list(map(lambda x: x[0], result)))
+        else:
+            return ()
 
     def get_ingredients(self, ingredient: str) -> list[tuple[str, int]]:
         """ Get's a list of all ingredients that contains ingredient's
@@ -227,6 +229,4 @@ if __name__ == '__main__':
     a = IngredientTable(database_name='food_blog.db')
     b = QuantityTable(database_name='food_blog.db')
     c = MealsTable(database_name='food_blog.db')
-    print(b.get_recipe_id(6))
-    print(a.get_ingredient_id('sugar'))
-    print(c.get_meal_id('lunch'))
+    print(a.get_ingredient_ids(('sugar', 'milk', 'cacao')))
